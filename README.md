@@ -1,106 +1,64 @@
-# Containerised Jaffle Shop dbt Project
-This is a containerised version of the popular 
-[Jaffle Shop dbt project published by dbt Labs](https://github.com/dbt-labs/jaffle_shop). 
-You can use this project to populate and run Jaffle Shop in a Postgres instance.
+#!/bin/bash
 
-# Running the project with Docker
-You'll first need to build and run the services via Docker (as defined in `docker-compose.yml`):
-```bash
-$ docker-compose build
-$ docker-compose up
-```
+# Containerised VirtuMart DBT Project
+# This repository hosts a containerised version of the popular VirtuMart DBT project,
+# originally known as Jaffle Shop by dbt Labs. Use this project to populate and run 
+# VirtuMart in a Postgres instance through Docker.
 
-The commands above will run a Postgres instance and then build the dbt resources of Jaffle Shop as specified in the
-repository. These containers will remain up and running so that you can:
-- Query the Postgres database and the tables created out of dbt models
-- Run further dbt commands via dbt CLI
+# Running the Project with Docker
+# To get started, build and run the services defined in your docker-compose.yml:
+echo "Building and running Docker containers..."
+docker-compose build
+docker-compose up
 
+# This setup runs a Postgres instance and builds the dbt resources of VirtuMart as outlined 
+# in the repository. These containers will remain active, allowing you to:
+# - Query the Postgres database and interact with tables created from dbt models.
+# - Execute additional dbt commands via the dbt CLI.
 
-## Building additional or modified data models
-Once the containers are up and running, you can still make any modifications in the existing dbt project 
-and re-run any command to serve the purpose of the modifications. 
+# Building Additional or Modified Data Models
+# After the containers are operational, any modifications to the dbt project can be applied by re-running commands. 
 
-In order to build your data models, you first need to access the container.
+# 1. Access the dbt Container:
+# Identify the running dbt container:
+echo "Accessing the dbt container..."
+container_id=$(docker ps | grep dbt | awk '{print $1}')
+docker exec -it $container_id /bin/bash
 
-To do so, we infer the container id for `dbt` running container:
-```bash
-docker ps
-```
+# 2. Run dbt Commands:
+# Execute the following in the container to update or rebuild models:
+echo "Running dbt commands inside the container..."
+docker exec -it $container_id /bin/bash -c "dbt deps; dbt seeds --profiles-dir profiles; dbt run --profiles-dir profiles; dbt snapshot --profiles-dir profiles; dbt test --profiles-dir profiles"
 
-Then enter the running container:
-```bash
-docker exec -it <container-id> /bin/bash
-```
+# Alternatively, combine these steps:
+echo "Building all dbt models and tests..."
+docker exec -it $container_id /bin/bash -c "dbt build --profiles-dir profiles"
 
-And finally:
+# Querying VirtuMart Data Models on Postgres
+# To query and verify the models, seeds, and snapshots created, follow these steps:
 
-```bash
-# Install dbt deps (might not required as long as you have no -or empty- `dbt_packages.yml` file)
-dbt deps
+# 1. Access the Postgres Service:
+# Locate the container ID:
+echo "Accessing the Postgres container..."
+postgres_container_id=$(docker ps | grep postgres | awk '{print $1}')
+docker exec -it $postgres_container_id /bin/bash
 
-# Build seeds
-dbt seeds --profiles-dir profiles
+# 2. Query Using psql:
+# Start the PostgreSQL interface:
+echo "Starting psql..."
+docker exec -it $postgres_container_id /bin/bash -c "psql -U postgres"
 
-# Build data models
-dbt run --profiles-dir profiles
+# List tables and views:
+echo "Listing tables and views in the database..."
+docker exec -it $postgres_container_id /bin/bash -c "psql -U postgres -c '\dt; \dv'"
 
-# Build snapshots
-dbt snapshot --profiles-dir profiles
+# 3. Perform SQL Queries:
+# Execute SQL queries to interact with the dbt models:
+echo "Querying tables..."
+table_or_view_name="customers"  # Change to the desired table or view
+docker exec -it $postgres_container_id /bin/bash -c "psql -U postgres -c 'SELECT * FROM $table_or_view_name;'"
 
-# Run tests
-dbt test --profiles-dir profiles
-```
-
-Alternatively, you can run everything in just a single command:
-
-```bash
-dbt build --profiles-dir profiles
-```
-
-## Querying Jaffle Shop data models on Postgres
-In order to query and verify the seeds, models and snapshots created in the dummy dbt project, simply follow the 
-steps below. 
-
-Find the container id of the postgres service:
-```commandline
-docker ps 
-```
-
-Then run 
-```commandline
-docker exec -it <container-id> /bin/bash
-```
-
-We will then use `psql`, a terminal-based interface for PostgreSQL that allows us to query the database:
-```commandline
-psql -U postgres
-```
-
-You can list tables and views as shown below:
-```bash
-postgres=# \dt
-             List of relations
- Schema |     Name      | Type  |  Owner   
---------+---------------+-------+----------
- public | customers     | table | postgres
- public | orders        | table | postgres
- public | raw_customers | table | postgres
- public | raw_orders    | table | postgres
- public | raw_payments  | table | postgres
-(5 rows)
-
-postgres=# \dv
-            List of relations
- Schema |     Name      | Type |  Owner   
---------+---------------+------+----------
- public | stg_customers | view | postgres
- public | stg_orders    | view | postgres
- public | stg_payments  | view | postgres
-(3 rows)
-
-```
-
-Now you can query the tables constructed form the seeds, models and snapshots defined in the dbt project:
-```sql
-SELEC * FROM <table_or_view_name>;
-```
+# Conclusion
+# This containerised approach to the VirtuMart DBT project simplifies the process of running 
+# and managing dbt tasks in a local development environment, using Docker to streamline operations
+# and interactions with the PostgreSQL database.
