@@ -1,4 +1,3 @@
-#!/bin/bash
 
 # Containerised VirtuMart DBT Project
 # This repository hosts a containerised version of the popular VirtuMart DBT project,
