@@ -102,5 +102,5 @@ postgres=# \dv
 
 Now you can query the tables constructed form the seeds, models and snapshots defined in the dbt project:
 ```sql
-SELEC * FROM <table_or_view_name>;
+SELECT * FROM <table_or_view_name>;
 ```
