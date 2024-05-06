@@ -104,3 +104,4 @@ Now you can query the tables constructed form the seeds, models and snapshots de
 ```sql
 SELECT * FROM <table_or_view_name>;
 ```
+![50227042618_2f8b46cfce_o 2](https://github.com/jyeshtha1799/VirtuMart-DBT-Dockerized/assets/114448454/f6eb6fe8-0433-4236-b816-0eaa8177a64c)
